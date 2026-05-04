@@ -26,6 +26,15 @@ video {
 h1 { font-size: 3rem; }
 h2 { color: #aaa; }
 h3 { color: #777; }
+
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
 </style>
 </head>
 <body>
@@ -33,6 +42,8 @@ h3 { color: #777; }
 <h1>Liegestütze: <span id="count">0</span></h1>
 <h2 id="highscore">Highscore: 0</h2>
 <h3 id="total">Gesamt: 0</h3>
+
+<button onclick="resetSession()">Reset aktuelle Liegestütze</button>
 
 <video id="video" autoplay playsinline></video>
 
@@ -62,9 +73,11 @@ let goingUp = false;
 // Glättung
 let angleBuffer = [];
 
+// Kamera starten
 navigator.mediaDevices.getUserMedia({ video: true })
   .then(stream => video.srcObject = stream);
 
+// MediaPipe
 const pose = new Pose({
   locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
 });
@@ -114,7 +127,7 @@ pose.onResults(results => {
     now - lastRep > 350
   ) {
     count++;
-    totalPushups++; // 🔥 Gesamt erhöhen
+    totalPushups++;
 
     countEl.innerText = count;
     totalEl.innerText = "Gesamt: " + totalPushups;
@@ -135,6 +148,7 @@ pose.onResults(results => {
   lastAngle = smoothAngle;
 });
 
+// Kamera Loop
 const camera = new Camera(video, {
   onFrame: async () => {
     await pose.send({ image: video });
@@ -144,6 +158,7 @@ const camera = new Camera(video, {
 });
 camera.start();
 
+// Winkel berechnen
 function getAngle(a, b, c) {
   const ab = { x: a.x - b.x, y: a.y - b.y };
   const cb = { x: c.x - b.x, y: c.y - b.y };
@@ -155,8 +170,15 @@ function getAngle(a, b, c) {
   return Math.acos(dot / (magAB * magCB)) * 180 / Math.PI;
 }
 
+// Durchschnitt
 function avg(arr) {
   return arr.reduce((a,b)=>a+b,0) / arr.length;
+}
+
+// 🔄 RESET NUR AKTUELLE SESSION
+function resetSession() {
+  count = 0;
+  countEl.innerText = count;
 }
 </script>
 
