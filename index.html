@@ -9,43 +9,88 @@
 
 <style>
 body {
-  text-align: center;
-  font-family: Arial;
-  background: #111;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "San Francisco", Arial;
+  background: #0f0f0f;
   color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* HEADER */
+.stats {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.stats h1 {
+  font-size: 3rem;
+  margin: 5px;
+}
+
+.stats h2, .stats h3 {
+  color: #888;
+  margin: 2px;
+  font-weight: 500;
+}
+
+/* VIDEO */
+.video-container {
+  margin-top: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 video {
   width: 95%;
   max-width: 700px;
-  border-radius: 15px;
-  margin-top: 20px;
+  border-radius: 20px;
   transform: scaleX(-1);
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
 }
 
-h1 { font-size: 3rem; }
-h2 { color: #aaa; }
-h3 { color: #777; }
+/* BUTTON */
+.controls {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
 
 button {
-  padding: 10px 20px;
-  margin-top: 10px;
-  border-radius: 10px;
+  background: #1c1c1e;
+  color: #aaa;
   border: none;
-  cursor: pointer;
+  padding: 12px 25px;
+  border-radius: 15px;
   font-size: 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #2c2c2e;
+  color: white;
 }
 </style>
 </head>
+
 <body>
 
-<h1>Liegestütze: <span id="count">0</span></h1>
-<h2 id="highscore">Highscore: 0</h2>
-<h3 id="total">Gesamt: 0</h3>
+<div class="stats">
+  <h1>Liegestütze: <span id="count">0</span></h1>
+  <h2 id="highscore">Highscore: 0</h2>
+  <h3 id="total">Gesamt: 0</h3>
+</div>
 
-<button onclick="resetSession()">Reset aktuelle Liegestütze</button>
+<div class="video-container">
+  <video id="video" autoplay playsinline></video>
+</div>
 
-<video id="video" autoplay playsinline></video>
+<div class="controls">
+  <button onclick="resetSession()">Reset Session</button>
+</div>
 
 <script>
 const video = document.getElementById('video');
@@ -55,29 +100,23 @@ const totalEl = document.getElementById('total');
 
 let count = 0;
 
-// gespeicherte Werte laden
 let highscore = localStorage.getItem("pushupHighscore") || 0;
 let totalPushups = localStorage.getItem("totalPushups") || 0;
 
 highscoreEl.innerText = "Highscore: " + highscore;
 totalEl.innerText = "Gesamt: " + totalPushups;
 
-// STATE
 let stage = "up";
 let lastRep = 0;
 
-// Bewegung
 let lastAngle = 180;
 let goingUp = false;
 
-// Glättung
 let angleBuffer = [];
 
-// Kamera starten
 navigator.mediaDevices.getUserMedia({ video: true })
   .then(stream => video.srcObject = stream);
 
-// MediaPipe
 const pose = new Pose({
   locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
 });
@@ -114,12 +153,10 @@ pose.onResults(results => {
 
   goingUp = smoothAngle > lastAngle;
 
-  // runter
   if (smoothAngle < 105) {
     stage = "down";
   }
 
-  // hoch + zählen
   if (
     smoothAngle > 145 &&
     stage === "down" &&
@@ -135,7 +172,6 @@ pose.onResults(results => {
     stage = "up";
     lastRep = now;
 
-    // speichern
     localStorage.setItem("totalPushups", totalPushups);
 
     if (count > highscore) {
@@ -148,7 +184,6 @@ pose.onResults(results => {
   lastAngle = smoothAngle;
 });
 
-// Kamera Loop
 const camera = new Camera(video, {
   onFrame: async () => {
     await pose.send({ image: video });
@@ -158,7 +193,6 @@ const camera = new Camera(video, {
 });
 camera.start();
 
-// Winkel berechnen
 function getAngle(a, b, c) {
   const ab = { x: a.x - b.x, y: a.y - b.y };
   const cb = { x: c.x - b.x, y: c.y - b.y };
@@ -170,12 +204,10 @@ function getAngle(a, b, c) {
   return Math.acos(dot / (magAB * magCB)) * 180 / Math.PI;
 }
 
-// Durchschnitt
 function avg(arr) {
   return arr.reduce((a,b)=>a+b,0) / arr.length;
 }
 
-// 🔄 RESET NUR AKTUELLE SESSION
 function resetSession() {
   count = 0;
   countEl.innerText = count;
