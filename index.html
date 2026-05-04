@@ -20,17 +20,19 @@ video {
   max-width: 700px;
   border-radius: 15px;
   margin-top: 20px;
-  transform: scaleX(-1); /* 🔥 DAS ist neu */
+  transform: scaleX(-1);
 }
 
 h1 { font-size: 3rem; }
 h2 { color: #aaa; }
+h3 { color: #777; }
 </style>
 </head>
 <body>
 
 <h1>Liegestütze: <span id="count">0</span></h1>
 <h2 id="highscore">Highscore: 0</h2>
+<h3 id="total">Gesamt: 0</h3>
 
 <video id="video" autoplay playsinline></video>
 
@@ -38,10 +40,16 @@ h2 { color: #aaa; }
 const video = document.getElementById('video');
 const countEl = document.getElementById('count');
 const highscoreEl = document.getElementById('highscore');
+const totalEl = document.getElementById('total');
 
 let count = 0;
+
+// gespeicherte Werte laden
 let highscore = localStorage.getItem("pushupHighscore") || 0;
+let totalPushups = localStorage.getItem("totalPushups") || 0;
+
 highscoreEl.innerText = "Highscore: " + highscore;
+totalEl.innerText = "Gesamt: " + totalPushups;
 
 // STATE
 let stage = "up";
@@ -54,11 +62,9 @@ let goingUp = false;
 // Glättung
 let angleBuffer = [];
 
-// Kamera starten
 navigator.mediaDevices.getUserMedia({ video: true })
   .then(stream => video.srcObject = stream);
 
-// MediaPipe
 const pose = new Pose({
   locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
 });
@@ -75,39 +81,32 @@ pose.onResults(results => {
 
   const lm = results.poseLandmarks;
 
-  // Sichtbarkeit
   function vis(p) {
     return p.visibility !== undefined ? p.visibility : 1;
   }
 
-  // rechter Arm
   const rightAngle = getAngle(lm[12], lm[14], lm[16]);
   const rightVis = (vis(lm[12]) + vis(lm[14]) + vis(lm[16])) / 3;
 
-  // linker Arm
   const leftAngle = getAngle(lm[11], lm[13], lm[15]);
   const leftVis = (vis(lm[11]) + vis(lm[13]) + vis(lm[15])) / 3;
 
-  // besseren Arm wählen
   let angle = rightVis > leftVis ? rightAngle : leftAngle;
 
-  // Glättung
   angleBuffer.push(angle);
   if (angleBuffer.length > 6) angleBuffer.shift();
 
   const smoothAngle = avg(angleBuffer);
-
   const now = Date.now();
 
-  // Bewegungsrichtung
   goingUp = smoothAngle > lastAngle;
 
-  // RUNTER
+  // runter
   if (smoothAngle < 105) {
     stage = "down";
   }
 
-  // HOCH + zählen (schnell & sauber)
+  // hoch + zählen
   if (
     smoothAngle > 145 &&
     stage === "down" &&
@@ -115,10 +114,16 @@ pose.onResults(results => {
     now - lastRep > 350
   ) {
     count++;
+    totalPushups++; // 🔥 Gesamt erhöhen
+
     countEl.innerText = count;
+    totalEl.innerText = "Gesamt: " + totalPushups;
 
     stage = "up";
     lastRep = now;
+
+    // speichern
+    localStorage.setItem("totalPushups", totalPushups);
 
     if (count > highscore) {
       highscore = count;
@@ -128,11 +133,8 @@ pose.onResults(results => {
   }
 
   lastAngle = smoothAngle;
-
-  console.log("Angle:", smoothAngle);
 });
 
-// Kamera Loop
 const camera = new Camera(video, {
   onFrame: async () => {
     await pose.send({ image: video });
@@ -142,7 +144,6 @@ const camera = new Camera(video, {
 });
 camera.start();
 
-// Winkel berechnen
 function getAngle(a, b, c) {
   const ab = { x: a.x - b.x, y: a.y - b.y };
   const cb = { x: c.x - b.x, y: c.y - b.y };
@@ -154,7 +155,6 @@ function getAngle(a, b, c) {
   return Math.acos(dot / (magAB * magCB)) * 180 / Math.PI;
 }
 
-// Durchschnitt
 function avg(arr) {
   return arr.reduce((a,b)=>a+b,0) / arr.length;
 }
