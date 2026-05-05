@@ -2,8 +2,6 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <title>Push-Up Counter PRO</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
@@ -18,7 +16,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  touch-action: manipulation;
 }
 
 /* HEADER */
@@ -36,6 +33,7 @@ body {
   font-size: 1.8rem;
   color: #888;
   margin: 4px;
+  font-weight: 500;
 }
 
 .stats h3 {
@@ -78,7 +76,9 @@ button {
   border-radius: 20px;
   font-size: 1.3rem;
   font-weight: 600;
+  letter-spacing: 0.5px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 button:active {
@@ -88,7 +88,7 @@ button:active {
 
 /* DAILY GOAL */
 .daily {
-  margin-top: 30px;
+  margin-top: 25px;
   text-align: center;
 }
 
@@ -121,6 +121,7 @@ button:active {
   <button onclick="resetSession()">Reset Session</button>
 </div>
 
+<!-- 🔥 NEU: DAILY GOAL -->
 <div class="daily">
   <h4>Tagesziel: <span id="goal">20</span></h4>
   <p><span id="today">0</span> / <span id="goal2">20</span></p>
@@ -141,26 +142,25 @@ let count = 0;
 let highscore = localStorage.getItem("pushupHighscore") || 0;
 let totalPushups = localStorage.getItem("totalPushups") || 0;
 
-// DAILY
+/* DAILY LOGIK */
 let goal = 20;
 let today = localStorage.getItem("todayPushups") || 0;
 let savedDate = localStorage.getItem("date");
 
 const currentDate = new Date().toISOString().split("T")[0];
 
-// neuer Tag → reset
 if (savedDate !== currentDate) {
   today = 0;
   localStorage.setItem("todayPushups", today);
   localStorage.setItem("date", currentDate);
 }
 
-highscoreEl.innerText = "Highscore: " + highscore;
-totalEl.innerText = "Gesamt: " + totalPushups;
-
 todayEl.innerText = today;
 goalEl.innerText = goal;
 goal2El.innerText = goal;
+
+highscoreEl.innerText = "Highscore: " + highscore;
+totalEl.innerText = "Gesamt: " + totalPushups;
 
 let stage = "up";
 let lastRep = 0;
