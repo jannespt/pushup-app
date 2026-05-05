@@ -86,7 +86,7 @@ button:active {
   color: white;
 }
 
-/* DAILY GOAL */
+/* DAILY */
 .daily {
   margin-top: 25px;
   text-align: center;
@@ -95,12 +95,26 @@ button:active {
 .daily h4 {
   font-size: 1.4rem;
   color: #aaa;
-  margin: 5px;
 }
 
 .daily p {
   font-size: 1.6rem;
-  margin: 5px;
+}
+
+/* ACHIEVEMENTS */
+.achievements {
+  margin-top: 25px;
+  text-align: center;
+}
+
+.achievements h4 {
+  font-size: 1.4rem;
+  color: #aaa;
+}
+
+.achievements p {
+  font-size: 1.3rem;
+  color: #777;
 }
 </style>
 </head>
@@ -121,10 +135,18 @@ button:active {
   <button onclick="resetSession()">Reset Session</button>
 </div>
 
-<!-- 🔥 NEU: DAILY GOAL -->
 <div class="daily">
   <h4>Tagesziel: <span id="goal">20</span></h4>
   <p><span id="today">0</span> / <span id="goal2">20</span></p>
+</div>
+
+<!-- 🔥 NEU: ACHIEVEMENTS -->
+<div class="achievements">
+  <h4>Ziele</h4>
+  <p id="a50">50 ❌</p>
+  <p id="a100">100 ❌</p>
+  <p id="a200">200 ❌</p>
+  <p id="a500">500 ❌</p>
 </div>
 
 <script>
@@ -137,12 +159,18 @@ const todayEl = document.getElementById('today');
 const goalEl = document.getElementById('goal');
 const goal2El = document.getElementById('goal2');
 
+// Achievements
+const a50 = document.getElementById('a50');
+const a100 = document.getElementById('a100');
+const a200 = document.getElementById('a200');
+const a500 = document.getElementById('a500');
+
 let count = 0;
 
 let highscore = localStorage.getItem("pushupHighscore") || 0;
 let totalPushups = localStorage.getItem("totalPushups") || 0;
 
-/* DAILY LOGIK */
+/* DAILY */
 let goal = 20;
 let today = localStorage.getItem("todayPushups") || 0;
 let savedDate = localStorage.getItem("date");
@@ -161,6 +189,16 @@ goal2El.innerText = goal;
 
 highscoreEl.innerText = "Highscore: " + highscore;
 totalEl.innerText = "Gesamt: " + totalPushups;
+
+/* 🔥 ACHIEVEMENT UPDATE */
+function updateAchievements() {
+  a50.innerText = totalPushups >= 50 ? "50 ✓" : "50 ❌";
+  a100.innerText = totalPushups >= 100 ? "100 ✓" : "100 ❌";
+  a200.innerText = totalPushups >= 200 ? "200 ✓" : "200 ❌";
+  a500.innerText = totalPushups >= 500 ? "500 ✓" : "500 ❌";
+}
+
+updateAchievements();
 
 let stage = "up";
 let lastRep = 0;
@@ -229,6 +267,8 @@ pose.onResults(results => {
 
     localStorage.setItem("totalPushups", totalPushups);
     localStorage.setItem("todayPushups", today);
+
+    updateAchievements();
 
     stage = "up";
     lastRep = now;
