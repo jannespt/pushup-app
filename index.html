@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 
-<!-- kein Zoom, aber sauber skaliert -->
+<!-- 🔥 kein Zoom -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Push-Up Counter PRO</title>
@@ -14,7 +14,6 @@
 <style>
 body {
   margin: 0;
-  padding: 20px; /* 🔥 Abstand außen */
   font-family: -apple-system, BlinkMacSystemFont, "San Francisco", Arial;
   background: #0f0f0f;
   color: white;
@@ -24,44 +23,41 @@ body {
   touch-action: manipulation;
 }
 
-/* CONTAINER für bessere Breite */
-.container {
-  width: 100%;
-  max-width: 500px; /* 🔥 begrenzt Breite */
-}
-
 /* HEADER */
 .stats {
   text-align: center;
-  margin-top: 10px;
+  margin-top: 25px;
 }
 
 .stats h1 {
-  font-size: 3.5rem;
-  margin: 10px 0;
+  font-size: 3.8rem;
+  margin: 8px;
 }
 
 .stats h2 {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   color: #888;
-  margin: 6px 0;
+  margin: 4px;
+  font-weight: 500;
 }
 
 .stats h3 {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   color: #777;
-  margin: 6px 0;
+  margin: 4px;
 }
 
 /* VIDEO */
 .video-container {
-  margin-top: 20px;
+  margin-top: 25px;
+  width: 100%;
   display: flex;
   justify-content: center;
 }
 
 video {
-  width: 100%;
+  width: 95%;
+  max-width: 700px;
   border-radius: 20px;
   transform: scaleX(-1);
   box-shadow: 0 0 40px rgba(0,0,0,0.6);
@@ -69,11 +65,15 @@ video {
 
 /* BUTTON */
 .controls {
+  width: 100%;
+  display: flex;
+  justify-content: center;
   margin-top: 25px;
 }
 
 button {
-  width: 100%;
+  width: 85%;
+  max-width: 400px;
   background: #1c1c1e;
   color: #aaa;
   border: none;
@@ -81,6 +81,7 @@ button {
   border-radius: 20px;
   font-size: 1.3rem;
   font-weight: 600;
+  letter-spacing: 0.5px;
   cursor: pointer;
 }
 
@@ -93,22 +94,18 @@ button:active {
 
 <body>
 
-<div class="container">
+<div class="stats">
+  <h1>Liegestütze: <span id="count">0</span></h1>
+  <h2 id="highscore">Highscore: 0</h2>
+  <h3 id="total">Gesamt: 0</h3>
+</div>
 
-  <div class="stats">
-    <h1>Liegestütze: <span id="count">0</span></h1>
-    <h2 id="highscore">Highscore: 0</h2>
-    <h3 id="total">Gesamt: 0</h3>
-  </div>
+<div class="video-container">
+  <video id="video" autoplay playsinline></video>
+</div>
 
-  <div class="video-container">
-    <video id="video" autoplay playsinline></video>
-  </div>
-
-  <div class="controls">
-    <button onclick="resetSession()">Reset Session</button>
-  </div>
-
+<div class="controls">
+  <button onclick="resetSession()">Reset Session</button>
 </div>
 
 <script>
