@@ -2,6 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>Push-Up Counter PRO</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
@@ -16,6 +18,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  touch-action: manipulation;
 }
 
 /* HEADER */
@@ -33,7 +36,6 @@ body {
   font-size: 1.8rem;
   color: #888;
   margin: 4px;
-  font-weight: 500;
 }
 
 .stats h3 {
@@ -76,14 +78,29 @@ button {
   border-radius: 20px;
   font-size: 1.3rem;
   font-weight: 600;
-  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: 0.2s;
 }
 
 button:active {
   background: #2c2c2e;
   color: white;
+}
+
+/* DAILY GOAL */
+.daily {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.daily h4 {
+  font-size: 1.4rem;
+  color: #aaa;
+  margin: 5px;
+}
+
+.daily p {
+  font-size: 1.6rem;
+  margin: 5px;
 }
 </style>
 </head>
@@ -104,19 +121,46 @@ button:active {
   <button onclick="resetSession()">Reset Session</button>
 </div>
 
+<div class="daily">
+  <h4>Tagesziel: <span id="goal">20</span></h4>
+  <p><span id="today">0</span> / <span id="goal2">20</span></p>
+</div>
+
 <script>
 const video = document.getElementById('video');
 const countEl = document.getElementById('count');
 const highscoreEl = document.getElementById('highscore');
 const totalEl = document.getElementById('total');
 
+const todayEl = document.getElementById('today');
+const goalEl = document.getElementById('goal');
+const goal2El = document.getElementById('goal2');
+
 let count = 0;
 
 let highscore = localStorage.getItem("pushupHighscore") || 0;
 let totalPushups = localStorage.getItem("totalPushups") || 0;
 
+// DAILY
+let goal = 20;
+let today = localStorage.getItem("todayPushups") || 0;
+let savedDate = localStorage.getItem("date");
+
+const currentDate = new Date().toISOString().split("T")[0];
+
+// neuer Tag → reset
+if (savedDate !== currentDate) {
+  today = 0;
+  localStorage.setItem("todayPushups", today);
+  localStorage.setItem("date", currentDate);
+}
+
 highscoreEl.innerText = "Highscore: " + highscore;
 totalEl.innerText = "Gesamt: " + totalPushups;
+
+todayEl.innerText = today;
+goalEl.innerText = goal;
+goal2El.innerText = goal;
 
 let stage = "up";
 let lastRep = 0;
@@ -177,14 +221,17 @@ pose.onResults(results => {
   ) {
     count++;
     totalPushups++;
+    today++;
 
     countEl.innerText = count;
     totalEl.innerText = "Gesamt: " + totalPushups;
+    todayEl.innerText = today;
+
+    localStorage.setItem("totalPushups", totalPushups);
+    localStorage.setItem("todayPushups", today);
 
     stage = "up";
     lastRep = now;
-
-    localStorage.setItem("totalPushups", totalPushups);
 
     if (count > highscore) {
       highscore = count;
